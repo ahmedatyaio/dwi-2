@@ -1,42 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Button, Image, View, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import * as Permissions from 'expo-permissions';
 
-import ListingEditScreen from './app/screens/ListingEditScreen';
-import Screen from './app/components/Screen';
-import { Button, Image, Text } from 'react-native';
+export default function ImagePickerExample() {
+  const [image, setImage] = useState(null);
 
-export default function App() {
-  const [imageUri, setImageUri] = useState('');
-  const requestPermission = async () => {
-    const { granted } = await ImagePicker.requestCameraPermissionsAsync();
-    if (!granted) {
-      alert('You need to enable permission to access the library.');
-    }
-  };
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 2],
+      presentationStyle: ImagePicker.UIImagePickerPresentationStyle.FULL_SCREEN,
+    });
 
-  useEffect(() => {
-    requestPermission();
-  }, []);
+    console.log(JSON.stringify(result, null, 2));
 
-  const selectImage = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync();
-      if (result.assets) {
-        console.log(result.assets);
-        setImageUri(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.log(error);
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
     }
   };
 
   return (
-    <Screen>
-      <Button title="Select image" onPress={selectImage} />
-      {imageUri && (
-        <Image source={{ uri: imageUri }} style={{ width: 200, height: 200 }} />
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Button title="Pick an image from camera roll" onPress={pickImage} />
+      {image && (
+        <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />
       )}
-    </Screen>
+    </View>
   );
 }
